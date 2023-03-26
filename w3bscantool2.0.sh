@@ -25,7 +25,8 @@ install_deps() {
     sudo yum install -y nmap nikto
   elif [ -f /etc/arch-release ]; then
     # Arch Linux
-    sudo pacman -Sy nmap nikto
+    sudo pacman -Syu 
+nmap nikto
   else
     echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
     exit 1
