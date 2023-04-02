@@ -89,32 +89,36 @@ main() {
   fi
 
   # Leer la opción de escaneo del usuario
-  echo "Seleccione una opción:"
+echo "Seleccione una opción:"
 echo "1) Escaneo rápido de puertos"
 echo "2) Escaneo de puertos y servicios"
 echo "3) Escaneo de vulnerabilidades con Nikto"
 echo "4) Escaneo de vulnerabilidades LFI y RFI"
 read -p "> " scan_option
-#Realizar el escaneo seleccionado por el usuario
-1) echo "Realizando escaneo rápido de puertos en $url..."
-nmap -F $url
-;;
-2) echo "Realizando escaneo de puertos y servicios en $url..."
-nmap -sV $url
-;;
-3) echo "Realizando escaneo de vulnerabilidades con Nikto en $url..."
-nikto -h $url
-;;
-4)
-scan_lfi
-scan_rfi
-;;
 
-*)
-echo "Opción inválida. Saliendo."
-exit 1
-;;
+# Realizar el escaneo seleccionado por el usuario
+case "$scan_option" in
+  1)
+    echo "Realizando escaneo rápido de puertos en $url..."
+    nmap -F $url
+    ;;
+  2)
+    echo "Realizando escaneo de puertos y servicios en $url..."
+    nmap -sV $url
+    ;;
+  3)
+    echo "Realizando escaneo de vulnerabilidades con Nikto en $url..."
+    nikto -h $url
+    ;;
+  4)
+    scan_lfi
+    scan_rfi
+    ;;
+  *)
+    echo "Opción inválida. Saliendo."
+    exit 1
+    ;;
 esac
-}
+
 # Llamar a la función principal con paréntesis
 main "$@"
