@@ -3,7 +3,7 @@
 # Función para mostrar el banner
 show_banner() {
   echo "--------------------------------------"
-  echo "| w3bscantool.sh                     |"
+  echo "| w3bscantool2.0.sh                     |"
   echo "| Herramienta de Escaneo Web         |"
   echo "| Hecho por Root/user/47363          |"
   echo "--------------------------------------"
