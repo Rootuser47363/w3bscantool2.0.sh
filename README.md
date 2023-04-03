@@ -1,4 +1,4 @@
-W3bscantool.sh
+#W3bscantool.sh
 W3bscantool.sh es una herramienta de escaneo de vulnerabilidades diseñada para ayudar a proteger sitios web contra posibles ataques. Con esta herramienta, podrás detectar vulnerabilidades y riesgos de seguridad en tu sitio web. Ten en cuenta que el autor no se hace responsable por el mal uso que se le dé a esta herramienta y es tu responsabilidad usarla con precaución.
 
 Instalación
