@@ -1,28 +1,26 @@
 #!/bin/bash
+######################################################
 
-Funcion para mostrar el banner y la ayuda:
-show_banner() {
-echo "######################################################"
-echo "# Herramienta de escaneo web v 2.0 #"
-echo "# #"
-echo "# Escanea vulnerabilidades LFI y RFI #"
-echo "# #"
-echo "# Ejemplo de uso: ./w3bscantool2.0.sh -u <url> [-h] [-l] [-r] [-s] [-q] [-x] #"
-echo "# #"
-echo "# Opciones: #"
-echo "# -h Mostrar este mensaje de ayuda #"
-echo "# -u Especificar la URL del sitio web a escanear #"
-echo "# -l Escanear vulnerabilidades LFI #"
-echo "# -r Escanear vulnerabilidades RFI #"
-echo "# -s Escanear vulnerabilidades de SQL injection #"
-echo "# -q Escanear vulnerabilidades de CMS específicas #"
-echo "# -x Escanear vulnerabilidades de XSS #"
-echo "######################################################"
-}
+# Herramienta de escaneo web v 2.0
+# Escanea vulnerabilidades web
+# Ejemplo de uso:
+# Escanear una URL en busca de vulnerabilidades:
+# ./w3bscantool2.0.sh -u <url> <1|2|3|4|5|6|7|8>
+# Opciones de escaneo:
+# 1) Escaneo rápido de puertos
+# 2) Escaneo de puertos y servicios
+# 3) Escaneo de vulnerabilidades con Nikto
+# 4) Escaneo de vulnerabilidades LFI y RFI
+# 5) Escaneo de archivos y directorios ocultos
+# 6) Escaneo de vulnerabilidades de SQL Injection
+# 7) Escaneo de vulnerabilidades de XSS
+# 8) Escaneo silencioso con nmap
+# 9) Instalar dependencias del sistema
+######################################################
 
-
-# Funcion para instalar dependencias:
+# Función para instalar dependencias:
 install_deps() {
+    # Comentario descriptivo de la función
     echo "Instalando dependencias..."
 
     # Detectar sistema operativo
@@ -32,102 +30,107 @@ install_deps() {
         sudo apt-get install -y nmap nikto
     elif [ -f /etc/redhat-release ]; then
         # Red Hat, CentOS, Fedora
-        sudo yum update
-        sudo yum install -y nmap nikto
+        if [ grep -q "CentOS Linux release 8" /etc/redhat-release ]; then
+            sudo dnf update
+            sudo dnf install -y nmap nikto
+        else
+            sudo yum update
+            sudo yum install -y nmap nikto
+        fi
     elif [ -f /etc/arch-release ]; then
         # Arch Linux
-        sudo pacman -Syu nmap nikto
+        sudo pacman -S nmap nikto
+    elif [ -f /etc/os-release ] && grep -q "Kali" /etc/os-release; then
+        # Kali Linux
+        sudo apt-get update
+        sudo apt-get install -y nmap nikto
+    elif [ -f /etc/os-release ] && grep -q "Parrot" /etc/os-release; then
+        # Parrot OS
+        sudo apt-get update
+        sudo apt-get install -y nmap nikto
+    elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ] || [ -f /etc/SUSE-release ]; then
+        # SUSE Linux
+        sudo zypper refresh
+        sudo zypper install -y nmap nikto
+    elif [ -f /etc/alpine-release ]; then
+        # Alpine Linux
+        sudo apk update
+        sudo apk add nmap nikto
     else
         echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
         exit 1
     fi
 }
 
-# Funcion para escanear vulnerabilidades LFI
+# Función para escanear vulnerabilidades de LFI
 scan_lfi() {
-    echo "Escaneando vulnerabilidades LFI en $url ..."
-    # Comandos para escanear LFI
-    # ...
+    echo "Realizando escaneo de vulnerabilidades de LFI en $url..."
+    nmap -sS -sV -p- -T5 -A -O -oN output.txt $url
 }
 
-# Funcion para escanear vulnerabilidades RFI
+# Función para escanear vulnerabilidades de RFI
 scan_rfi() {
-    echo "Escaneando vulnerabilidades RFI en $url ..."
-    # Comandos para escanear RFI
-    # ...
+    echo "Realizando escaneo de vulnerabilidades de RFI en $url..."
+    curl -v "$url/?url=http://google.com"
 }
 
-# Funcion para escanear vulnerabilidades de SQL injection
-scan_sql_injection() {
-    echo "Escaneando vulnerabilidades de SQL injection en $url ..."
-    # Comandos para escanear SQL injection
-    sqlmap -u $url --dbs
-}
-
-# Funcion para escanear vulnerabilidades de XSS
-scan_xss() {
-    echo "Escaneando vulnerabilidades de XSS en $url ..."
-    # Comandos para escanear XSS
-    xsser -u $url
-}
-
-# Funcion para escanear subdominios
-scan_subdomains() {
-    echo "Escaneando subdominios en $url ..."
-    # Comandos para escanear subdominios
-    sublist3r -d $url
-}
-
-# Funcion para escanear archivos y directorios ocultos
+# Función para escanear archivos y directorios ocultos
 scan_hidden_files() {
-    echo "Escaneando archivos y directorios ocultos en $url ..."
-    # Comandos para escanear archivos y directorios ocultos
-    gobuster dir -u $url -w /usr/share/wordlists/dirb/common.txt
+    echo "Realizando escaneo de archivos y directorios ocultos en $url..."
+    dirsearch -u "$url" -e php,asp,jsp,aspx,txt,html,js,css,png,jpg,gif,svg,woff,woff2,eot,ttf,xml,zip,tar.gz
 }
 
-# Funcion para escanear vulnerabilidades de CMS especificas
-scan_cms_vulnerabilities() {
-    read -p "Ingrese el nombre del CMS que desea escanear: " cms_name
-echo "Escaneando vulnerabilidades de $cms_name en $url ..."
-# Comandos para escanear vulnerabilidades de CMS especificas
-# ...
+# Función para escanear vulnerabilidades de XSS
+scan_xss() {
+    echo "Realizando escaneo de vulnerabilidades de XSS en $url..."
+    python3 xsser.py -u "$url" --auto --skip --threads 10 --level 3
 }
 
-Funcion principal del programa
+#Función principal del programa
 main() {
-show_banner
+
+# Verificar si se proporcionó una URL
+if [ -z "$url" ]; then
+    echo "Error: debe proporcionar una URL para escanear"
+    exit 1
+fi
+
+Instalar dependencias si se selecciona la opción correspondiente
+if [ "$option" == "9" ]; then
 install_deps
-# Analizar argumentos de linea de comandos
-while getopts "u:hlsrqx" option; do
-    case "${option}" in
-        u)
-            url=${OPTARG}
-            ;;
-        h)
-            show_banner
-            ;;
-        l)
-            scan_lfi
-            ;;
-        r)
-            scan_rfi
-            ;;
-        s)
-            scan_sql_injection
-            ;;
-        q)
-            scan_cms_vulnerabilities
-            ;;
-        x)
-            scan_xss
-            ;;
-        *)
-            echo "Opcion invalida. Ejecute el script con la opcion -h para obtener ayuda."
-            exit 1
-            ;;
-    esac
-done
+exit 0
+fi
+
+Realizar la acción seleccionada por el usuario
+case "$option" in
+"1") scan_ports_quick ;;
+"2") scan_ports_services ;;
+"3") scan_nikto ;;
+"4") scan_lfi && scan_rfi ;;
+"5") scan_hidden_files ;;
+"6") scan_sql_injection ;;
+"7") scan_xss ;;
+"8") scan_ports_silent ;;
+*) echo "Error: opción inválida" ;;
+esac
+
+exit 0
 }
 
-Llamar a la funcion principal del programa
-main "$@"
+Parsear argumentos de línea de comandos
+while getopts ":u:" opt; do
+case $opt in
+u) url="$OPTARG" ;;
+?) echo "Opción inválida -$OPTARG" >&2 ;;
+:) echo "La opción -$OPTARG requiere un argumento" >&2 ;;
+esac
+done
+
+Leer la opción del usuario después de los argumentos de línea de comandos
+read -p "Seleccione una opción (1-8): " option
+
+# Llamar a la función principal
+main
+
+# Mensaje de finalización
+echo "Programa finalizado."
