@@ -24,42 +24,46 @@ install_deps() {
     echo "Instalando dependencias..."
 
     # Detectar sistema operativo
-    if [ -f /etc/debian_version ]; then
-        # Debian, Ubuntu
-        sudo apt-get update
-        sudo apt-get install -y nmap nikto
-    elif [ -f /etc/redhat-release ]; then
-        # Red Hat, CentOS, Fedora
-        if [ grep -q "CentOS Linux release 8" /etc/redhat-release ]; then
-            sudo dnf update
-            sudo dnf install -y nmap nikto
-        else
-            sudo yum update
-            sudo yum install -y nmap nikto
-        fi
-    elif [ -f /etc/arch-release ]; then
-        # Arch Linux
-        sudo pacman -S nmap nikto
-    elif [ -f /etc/os-release ] && grep -q "Kali" /etc/os-release; then
-        # Kali Linux
-        sudo apt-get update
-        sudo apt-get install -y nmap nikto
-    elif [ -f /etc/os-release ] && grep -q "Parrot" /etc/os-release; then
-        # Parrot OS
-        sudo apt-get update
-        sudo apt-get install -y nmap nikto
-    elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ] || [ -f /etc/SUSE-release ]; then
-        # SUSE Linux
-        sudo zypper refresh
-        sudo zypper install -y nmap nikto
-    elif [ -f /etc/alpine-release ]; then
-        # Alpine Linux
-        sudo apk update
-        sudo apk add nmap nikto
+if [ -f /etc/debian_version ]; then
+    # Debian, Ubuntu
+    sudo apt-get update
+    sudo apt-get install -y nmap nikto
+elif [ -f /etc/redhat-release ]; then
+    # Red Hat, CentOS, Fedora
+    if [ grep -q "CentOS Linux release 8" /etc/redhat-release ]; then
+        sudo dnf update
+        sudo dnf install -y nmap nikto
     else
-        echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
-        exit 1
+        sudo yum update
+        sudo yum install -y nmap nikto
     fi
+elif [ -f /etc/arch-release ]; then
+    # Arch Linux
+    sudo pacman -S nmap nikto
+elif [ -f /etc/os-release ] && grep -q "Kali" /etc/os-release; then
+    # Kali Linux
+    sudo apt-get update
+    sudo apt-get install -y nmap nikto
+elif [ -f /etc/os-release ] && grep -q "Parrot" /etc/os-release; then
+    # Parrot OS
+    sudo apt-get update
+    sudo apt-get install -y nmap nikto
+elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ] || [ -f /etc/SUSE-release ]; then
+    # SUSE Linux
+    sudo zypper refresh
+    sudo zypper install -y nmap nikto
+elif [ -f /etc/alpine-release ]; then
+    # Alpine Linux
+    sudo apk update
+    sudo apk add nmap nikto
+elif [ "$(uname)" == "Darwin" ]; then
+    # macOS
+    brew update
+    brew install nmap nikto
+else
+    echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
+    exit 1
+fi
 }
 
 # Función para escanear vulnerabilidades de LFI
@@ -95,7 +99,7 @@ if [ -z "$url" ]; then
     exit 1
 fi
 
-Instalar dependencias si se selecciona la opción correspondiente
+# Instalar dependencias si se selecciona la opción correspondiente
 if [ "$option" == "9" ]; then
 install_deps
 exit 0
@@ -117,7 +121,7 @@ esac
 exit 0
 }
 
-Parsear argumentos de línea de comandos
+# Parsear argumentos de línea de comandos
 while getopts ":u:" opt; do
 case $opt in
 u) url="$OPTARG" ;;
@@ -126,7 +130,7 @@ u) url="$OPTARG" ;;
 esac
 done
 
-Leer la opción del usuario después de los argumentos de línea de comandos
+# Leer la opción del usuario después de los argumentos de línea de comandos
 read -p "Seleccione una opción (1-8): " option
 
 # Llamar a la función principal
