@@ -1,11 +1,8 @@
 #!/bin/bash
-######################################################
 
-# Herramienta de escaneo web v 2.0
+# W3BSCANtool v2.8
 # Escanea vulnerabilidades web
-# Ejemplo de uso:
-# Escanear una URL en busca de vulnerabilidades:
-# ./w3bscantool2.0.sh -u <url> <1|2|3|4|5|6|7|8>
+# Uso: ./w3bscantool2.8.sh -u <url> <1|2|3|4|5|6|7|8>
 # Opciones de escaneo:
 # 1) Escaneo rápido de puertos
 # 2) Escaneo de puertos y servicios
@@ -16,125 +13,185 @@
 # 7) Escaneo de vulnerabilidades de XSS
 # 8) Escaneo silencioso con nmap
 # 9) Instalar dependencias del sistema
-######################################################
+
+cyan="\033[0;36m"
+purple="\033[0;35m"
+green="\033[0;32m"
+yellow="\033[1;33m"
+red="\033[0;31m"
+nc="\033[0m"
+
+echo -e "${red}╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮${nc}"
+echo -e "${red}┃${cyan}                      #####                                                                 #####        ###   ${red}┃${nc}"
+echo -e "${red}┃${cyan} #    # #     # #####   ####   ####    ##   #    # #####  ####   ####  #      #     #      #   #  ${red}┃${nc}"
+echo -e "${red}┃${cyan} #    #       # #    # #      #    #  #  #  ##   #   #   #    # #    # #            #     #     # ${red}┃${nc}"
+echo -e "${red}┃${cyan} #    #  #####  #####   ####  #      #    # # #  #   #   #    # #    # #       #####      #     # ${red}┃${nc}"
+echo -e "${red}┃${cyan} # ## #       # #    #      # #      ###### #  # #   #   #    # #    # #      #       ### #     # ${red}┃${nc}"
+echo -e "${red}┃${cyan} ##  ## #     # #    # #    # #    # #    # #   ##   #   #    # #    # #      #       ###  #   #  ${red}┃${nc}"
+echo -e "${red}┃${cyan} #    #  #####  #####   ####   ####  #    # #    #   #    ####   ####  ###### ####### ###   ###   ${red}┃${nc}"
+echo -e "${red}┃${purple}                      Escanea vulnerabilidades web             ${red}┃${nc}"
+echo -e "${red}╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯${nc}"
+echo ""
+echo -e "${green}Uso:${nc} ./w3bscantool2.8.sh -u <url> <1|2|3|4|5|6|7|8>"
+echo ""
+echo -e "${purple}Opciones de escaneo:${nc}"
+
+
+echo "1) Escaneo rápido de puertos"
+echo "2) Escaneo de puertos y servicios"
+echo "3) Escaneo de vulnerabilidades con Nikto"
+echo "4) Escaneo de vulnerabilidades LFI y RFI"
+echo "5) Escaneo de archivos y directorios ocultos"
+echo "6) Escaneo de vulnerabilidades de SQL Injection"
+echo "7) Escaneo de vulnerabilidades de XSS"
+echo "8) Escaneo silencioso con nmap"
+echo "9) Instalar dependencias del sistema "
 
 # Función para instalar dependencias:
 install_deps() {
-    # Comentario descriptivo de la función
     echo "Instalando dependencias..."
-
     # Detectar sistema operativo
-if [ -f /etc/debian_version ]; then
-    # Debian, Ubuntu
-    sudo apt-get update
-    sudo apt-get install -y nmap nikto
-elif [ -f /etc/redhat-release ]; then
-    # Red Hat, CentOS, Fedora
-    if [ grep -q "CentOS Linux release 8" /etc/redhat-release ]; then
-        sudo dnf update
-        sudo dnf install -y nmap nikto
+    if [ -f /etc/debian_version ]; then
+        # Debian, Ubuntu
+        sudo apt-get update
+        sudo apt-get install -y nmap nikto
+    elif [ -f /etc/redhat-release ]; then
+        # Red Hat, CentOS, Fedora
+        if grep -q "CentOS Linux release 8" /etc/redhat-release; then
+            sudo dnf update
+            sudo dnf install -y nmap nikto
+        else
+            sudo yum update
+            sudo yum install -y nmap nikto
+        fi
+    elif [ -f /etc/arch-release ]; then
+        # Arch Linux
+        sudo pacman -S nmap nikto
+    elif grep -q "Kali" /etc/os-release; then
+        # Kali Linux
+        sudo apt-get update
+        sudo apt-get install -y nmap nikto
+    elif grep -q "Parrot" /etc/os-release; then
+        # Parrot OS
+        sudo apt-get update
+        sudo apt-get install -y nmap nikto
+    elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ] || [ -f /etc/SUSE-release ]; then
+        # SUSE Linux
+        sudo zypper refresh
+        sudo zypper install -y nmap nikto
+    elif [ -f /etc/alpine-release ]; then
+        # Alpine Linux
+        sudo apk update
+        sudo apk add nmap nikto
+    elif [ "$(uname)" == "Darwin" ]; then
+        # macOS
+        brew update
+        brew install nmap nikto
     else
-        sudo yum update
-        sudo yum install -y nmap nikto
+        echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
+        exit 1
     fi
-elif [ -f /etc/arch-release ]; then
-    # Arch Linux
-    sudo pacman -S nmap nikto
-elif [ -f /etc/os-release ] && grep -q "Kali" /etc/os-release; then
-    # Kali Linux
-    sudo apt-get update
-    sudo apt-get install -y nmap nikto
-elif [ -f /etc/os-release ] && grep -q "Parrot" /etc/os-release; then
-    # Parrot OS
-    sudo apt-get update
-    sudo apt-get install -y nmap nikto
-elif [ -f /etc/SuSE-release ] || [ -f /etc/SUSE-brand ] || [ -f /etc/SUSE-release ]; then
-    # SUSE Linux
-    sudo zypper refresh
-    sudo zypper install -y nmap nikto
-elif [ -f /etc/alpine-release ]; then
-    # Alpine Linux
-    sudo apk update
-    sudo apk add nmap nikto
-elif [ "$(uname)" == "Darwin" ]; then
-    # macOS
-    brew update
-    brew install nmap nikto
-else
-    echo "Error: No se pudo detectar el sistema operativo. Por favor, instale manualmente las siguientes dependencias: nmap, nikto."
-    exit 1
-fi
+    echo "Las dependencias se han instalado correctamente."
+}
+# Función para mostrar la ayuda:
+show_help() {
+    echo "Uso: $0 OPCIONES [ARGUMENTO]"
+    echo ""
+    echo "Opciones:"
+    echo " 1) Escaneo rápido de puertos - Escanea los puertos abiertos en la máquina de forma rápida."
+    echo " 2) Escaneo de puertos y servicios - Escanea los puertos abiertos y muestra los servicios asociados a cada uno."
+    echo " 3) Escaneo de vulnerabilidades con Nikto - Escanea la máquina en busca de vulnerabilidades usando Nikto."
+    echo " 4) Escaneo de vulnerabilidades LFI y RFI - Escanea la máquina en busca de vulnerabilidades de Local File Inclusion (LFI) y Remote File Inclusion (RFI)."
+    echo " 5) Escaneo de archivos y directorios ocultos - Escanea la máquina en busca de archivos y directorios ocultos."
+    echo " 6) Escaneo de vulnerabilidades de SQL Injection - Escanea la máquina en busca de vulnerabilidades de SQL Injection."
+    echo " 7) Escaneo de vulnerabilidades de XSS - Escanea la máquina en busca de vulnerabilidades de Cross-site scripting (XSS)."
+    echo " 8) Escaneo silencioso con nmap - Escanea los puertos abiertos en la máquina de forma silenciosa."
+    echo "9) Instalar dependencias del sistema"
+
 }
 
-# Función para escanear vulnerabilidades de LFI
-scan_lfi() {
-    echo "Realizando escaneo de vulnerabilidades de LFI en $url..."
-    nmap -sS -sV -p- -T5 -A -O -oN output.txt $url
+# Función para escanear rápidamente los puertos:
+scan_ports() {
+    echo "Escaneando puertos con nmap..."
+    sudo nmap -T4 -F $url
 }
 
-# Función para escanear vulnerabilidades de RFI
-scan_rfi() {
-    echo "Realizando escaneo de vulnerabilidades de RFI en $url..."
-    curl -v "$url/?url=http://google.com"
+# Función para escanear los puertos y servicios:
+scan_services() {
+    echo "Escaneando puertos y servicios con nmap..."
+    sudo nmap -sV -T4 $url
 }
 
-# Función para escanear archivos y directorios ocultos
-scan_hidden_files() {
-    echo "Realizando escaneo de archivos y directorios ocultos en $url..."
-    dirsearch -u "$url" -e php,asp,jsp,aspx,txt,html,js,css,png,jpg,gif,svg,woff,woff2,eot,ttf,xml,zip,tar.gz
+# Función para escanear vulnerabilidades con Nikto:
+scan_nikto() {
+    echo "Escaneando vulnerabilidades con Nikto..."
+    sudo nikto -h $url
 }
 
-# Función para escanear vulnerabilidades de XSS
+# Función para escanear vulnerabilidades LFI y RFI:
+scan_lfi_rfi() {
+    echo "Escaneando vulnerabilidades LFI y RFI..."
+    sudo nikto -h $url -Tuning 1234567 -C all
+}
+
+# Función para escanear archivos y directorios ocultos:
+scan_hidden() {
+    echo "Escaneando archivos y directorios ocultos con dirb..."
+    sudo dirb $url -r
+}
+
+# Función para escanear vulnerabilidades de SQL Injection:
+scan_sql_injection() {
+    echo "Escaneando vulnerabilidades de SQL Injection con sqlmap..."
+    sudo sqlmap -u $url --batch --level=5
+}
+
+# Función para escanear vulnerabilidades de XSS:
 scan_xss() {
-    echo "Realizando escaneo de vulnerabilidades de XSS en $url..."
-    python3 xsser.py -u "$url" --auto --skip --threads 10 --level 3
+    echo "Escaneando vulnerabilidades de XSS con XSSer..."
+    sudo xsser -u $url
 }
 
-#Función principal del programa
-main() {
-
-# Verificar si se proporcionó una URL
-if [ -z "$url" ]; then
-    echo "Error: debe proporcionar una URL para escanear"
+# Verificar si se ha proporcionado una URL como argumento:
+if [[ -z "$2" ]]; then
+    echo "Error: Debe proporcionar una URL como argumento."
+    echo ""
+    show_help
     exit 1
 fi
+# Capturar los argumentos
+url=""
+option=""
 
-# Instalar dependencias si se selecciona la opción correspondiente
-if [ "$option" == "9" ]; then
-install_deps
-exit 0
-fi
-
-Realizar la acción seleccionada por el usuario
-case "$option" in
-"1") scan_ports_quick ;;
-"2") scan_ports_services ;;
-"3") scan_nikto ;;
-"4") scan_lfi && scan_rfi ;;
-"5") scan_hidden_files ;;
-"6") scan_sql_injection ;;
-"7") scan_xss ;;
-"8") scan_ports_silent ;;
-*) echo "Error: opción inválida" ;;
-esac
-
-exit 0
-}
-
-# Parsear argumentos de línea de comandos
-while getopts ":u:" opt; do
-case $opt in
-u) url="$OPTARG" ;;
-?) echo "Opción inválida -$OPTARG" >&2 ;;
-:) echo "La opción -$OPTARG requiere un argumento" >&2 ;;
-esac
+while getopts "u:" opt; do
+  case $opt in
+    u) url="$OPTARG";;
+    \?) echo "Opción inválida: -$OPTARG" >&2;;
+  esac
 done
 
-# Leer la opción del usuario después de los argumentos de línea de comandos
-read -p "Seleccione una opción (1-8): " option
+shift $((OPTIND-1))
+option="$1"
 
-# Llamar a la función principal
-main
-
-# Mensaje de finalización
-echo "Programa finalizado."
+# Procesar la opción seleccionada
+case $option in
+  1) # Escaneo rápido de puertos
+     nmap -T4 -F $url;;
+  2) # Escaneo de puertos y servicios
+     nmap -sV $url;;
+  3) # Escaneo de vulnerabilidades con Nikto
+     nikto -h $url;;
+  4) # Escaneo de vulnerabilidades LFI y RFI
+     nikto -h $url -Tuning 1234567;;
+  5) # Escaneo de archivos y directorios ocultos
+     nikto -h $url -C all;;
+  6) # Escaneo de vulnerabilidades de SQL Injection
+     nikto -h $url -Plugins "sql-injection";;
+  7) # Escaneo de vulnerabilidades de XSS
+     nikto -h $url -Plugins "xss";;
+  8) # Escaneo silencioso con nmap
+     nmap -T4 -sS -Pn $url;;
+  9) # Instalar dependencias del sistema
+     install_deps;;
+  *) echo "Opción inválida: $option" >&2;;
+esac
