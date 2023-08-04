@@ -2,7 +2,7 @@
 
 # W3BSCANtool v2.8
 # Escanea vulnerabilidades web
-# Uso: ./w3bscantool2.8.sh -u <url> <1|2|3|4|5|6|7|8>
+# Uso: ./w3bscantool2.0.sh -u <url> <1|2|3|4|5|6|7|8>
 # Opciones de escaneo:
 # 1) Escaneo rápido de puertos
 # 2) Escaneo de puertos y servicios
