@@ -34,7 +34,7 @@ Please note that this tool can automatically install the necessary dependencies 
 
 The W3bscantool.sh tool can be used with the following options:
 
-./w3bscantool2.8.sh -u <url> <1|2|3|4|5|6|7|8>
+./w3bscantool2.0.sh -u <url> <1|2|3|4|5|6|7|8>
 
 Scan options:
 
